@@ -27,8 +27,31 @@
 		<docker.image.prefix>ernestoacostacuba</docker.image.prefix>
 
 		<!-- Set to name of project-->
-		<docker.image.name>springbootdocker</docker.image.name>
+		<docker.image.name>docker.io</docker.image.name>
+
+		<maven.release.plugin.version>2.5.3</maven.release.plugin.version>
+		<project.scm.id>ernestoacostacuba@yahoo.com.mx</project.scm.id>
 	</properties>
+
+	<scm>
+		<connection>scm:git:https://github.com/docker-4-java/spring-boot-docker.git</connection>
+		<developerConnection>scm:git:https://github.com/docker-4-java/spring-boot-docker.git</developerConnection>
+		<tag>0.0.1</tag>
+	</scm>
+
+	<repositories>
+		<repository>
+			<id>localDeploy</id>
+			<url>file:///home/eara/Documenti/Corsi/SpringBoot/releases</url>
+		</repository>
+	</repositories>
+
+	<distributionManagement>
+		<site>
+			<id></id>
+			<url>https://github.com/docker-4-java/spring-boot-docker.git</url>
+		</site>
+	</distributionManagement>
 
 	<dependencies>
 		<dependency>
@@ -88,8 +111,52 @@
 					</images>
 				</configuration>
 			</plugin>
+
+			<plugin>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>${maven.release.plugin.version}</version>
+				<configuration>
+					<releaseProfiles>release</releaseProfiles>
+					<!--
+					<preparationGoals>clean verify</preparationGoals>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<tagNameFormat>@{project.version}</tagNameFormat>-->
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
-	
 
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>io.fabric8</groupId>
+						<artifactId>docker-maven-plugin</artifactId>
+						<version>${docker-maven-plugin.version}</version>
+						<configuration>
+							<images>
+								<image>
+									<name>${docker.image.prefix}/${docker.image.name}</name>
+									<build>
+										<dockerFileDir>${project.basedir}/src/main/docker/</dockerFileDir>
+
+										<!-- Copies artifact to docker build dir in target-->
+										<assembly>
+											<descriptorRef>artifact</descriptorRef>
+										</assembly>
+										<tags>
+											<tag>latest</tag>
+											<tag>${project.version}</tag>
+										</tags>
+									</build>
+								</image>
+							</images>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
