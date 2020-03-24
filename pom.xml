@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>guru.springframework</groupId>
 	<artifactId>spring-boot-docker</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>spring-boot-docker</name>
@@ -15,7 +14,7 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.2.5.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
 	<properties>
@@ -36,7 +35,7 @@
 	<scm>
 		<connection>scm:git:https://github.com/docker-4-java/spring-boot-docker.git</connection>
 		<developerConnection>scm:git:https://github.com/docker-4-java/spring-boot-docker.git</developerConnection>
-		<tag>0.0.1</tag>
+		<tag>spring-boot-docker-0.0.1</tag>
 	</scm>
 
 	<repositories>
@@ -48,7 +47,7 @@
 
 	<distributionManagement>
 		<site>
-			<id></id>
+			<id />
 			<url>https://github.com/docker-4-java/spring-boot-docker.git</url>
 		</site>
 	</distributionManagement>
@@ -96,7 +95,7 @@
 						<image>
 							<name>${docker.image.prefix}/${docker.image.name}</name>
 							<build>
-								<dockerFileDir>${project.basedir}/src/main/docker/</dockerFileDir>
+								<dockerFileDir>${project.basedir}/target/dockerfile/</dockerFileDir>
 
 								<!-- Copies artifact to docker build dir in target-->
 								<assembly>
@@ -113,50 +112,41 @@
 			</plugin>
 
 			<plugin>
-				<artifactId>maven-release-plugin</artifactId>
-				<version>${maven.release.plugin.version}</version>
+				<groupId>org.codehaus.gmavenplus</groupId>
+				<artifactId>gmavenplus-plugin</artifactId>
+				<version>1.8.1</version>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>execute</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
-					<releaseProfiles>release</releaseProfiles>
-					<!--
-					<preparationGoals>clean verify</preparationGoals>
-					<autoVersionSubmodules>true</autoVersionSubmodules>
-					<tagNameFormat>@{project.version}</tagNameFormat>-->
+					<scripts>file:///${project.basedir}/src/main/scripts/BuildDockerfile.groovy</scripts>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-all</artifactId>
+						<version>1.7.6</version>
+						<scope>runtime</scope>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.7</version>
+				<configuration>
+					<excludes>
+						<exclude>org.apache.commons:commons-collections4</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 		</plugins>
 	</build>
 
-	<profiles>
-		<profile>
-			<id>release</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>io.fabric8</groupId>
-						<artifactId>docker-maven-plugin</artifactId>
-						<version>${docker-maven-plugin.version}</version>
-						<configuration>
-							<images>
-								<image>
-									<name>${docker.image.prefix}/${docker.image.name}</name>
-									<build>
-										<dockerFileDir>${project.basedir}/src/main/docker/</dockerFileDir>
-
-										<!-- Copies artifact to docker build dir in target-->
-										<assembly>
-											<descriptorRef>artifact</descriptorRef>
-										</assembly>
-										<tags>
-											<tag>latest</tag>
-											<tag>${project.version}</tag>
-										</tags>
-									</build>
-								</image>
-							</images>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 </project>
